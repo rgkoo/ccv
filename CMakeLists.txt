@@ -13,7 +13,7 @@ IF(CMAKE_VERSION VERSION_EQUAL "3.0.0" OR
  CMAKE_POLICY(SET CMP0045 OLD)  # suppress set_target_properties empty target warnning
  CMAKE_POLICY(SET CMP0026 OLD)  # suppress set_target_properties read LOCATION warnning
 ENDIF()
-set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS} -g -ftest-coverage -fprofile-arcs")
+set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS} -g -ftest-coverage -fprofile-arcs -pthread -ldl")
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
@@ -31,7 +31,7 @@ endif()
 
 set(3rd_root  "${CMAKE_CURRENT_SOURCE_DIR}/3rd")
 
-#find_package( OpenCV REQUIRED )
+find_package( OpenCV REQUIRED )
 #set(QTDIR ${QT_SEARCH_PATH}/bin)
 set(bin_dirs ${bin_dirs} ${QTDIR})
 set(OpenCV_BIN_DIR ${OpenCV_CONFIG_PATH}/${OpenCV_ARCH}/${OpenCV_RUNTIME}/bin/)
