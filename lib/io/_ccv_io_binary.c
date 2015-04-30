@@ -1,3 +1,5 @@
+#include <ccv.h>
+#include <stdio.h>
 static void _ccv_write_binary_fd(ccv_dense_matrix_t* mat, FILE* fd, void* conf)
 {
 	fwrite("CCVBINDM", 1, 8, fd);
@@ -19,3 +21,4 @@ static void _ccv_read_binary_fd(FILE* in, ccv_dense_matrix_t** x, int type)
 	*x = ccv_dense_matrix_new(rows, cols, type, 0, 0);
 	fread((*x)->data.u8, 1, (*x)->step * (*x)->rows, in);
 }
+

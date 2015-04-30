@@ -1,3 +1,6 @@
+#include <ccv.h>
+#include <stdio.h>
+#include "png.h"
 static void _ccv_read_png_fd(FILE* in, ccv_dense_matrix_t** x, int type)
 {
 	png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
@@ -83,3 +86,4 @@ static void _ccv_write_png_fd(ccv_dense_matrix_t* mat, FILE* fd, void* conf)
 	png_write_end(png_ptr, info_ptr);
 	png_destroy_write_struct(&png_ptr, &info_ptr);
 }
+

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 2.8)
 
 project(ccv_probation)
 set(CMAKE_BUILD_TYPE Debug)
@@ -13,7 +13,7 @@ IF(CMAKE_VERSION VERSION_EQUAL "3.0.0" OR
  CMAKE_POLICY(SET CMP0045 OLD)  # suppress set_target_properties empty target warnning
  CMAKE_POLICY(SET CMP0026 OLD)  # suppress set_target_properties read LOCATION warnning
 ENDIF()
-
+set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS} -g -ftest-coverage -fprofile-arcs")
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
@@ -40,15 +40,17 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
-
-set(DATA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/data)
-
 include(CreateLaunchers)
-set(DATA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/data)
+set(DATA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/samples)
 configure_file(
 	config.hpp.in 
 	${CMAKE_CURRENT_BINARY_DIR}/config.hpp
 	)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
+
+add_definitions(-DHAVE_LIBJPEG)
+add_definitions(-DHAVE_LIBPNG)
+
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib)	
 add_subdirectory(lib)
+add_subdirectory(app)

@@ -1,3 +1,5 @@
+#include <ccv.h>
+#include <stdio.h>
 static void _ccv_read_rgb_raw(ccv_dense_matrix_t** x, const void* data, int type, int rows, int cols, int scanline)
 {
 	int ctype = (type & 0xF00) ? CCV_8U | ((type & 0xF00) >> 8) : CCV_8U | CCV_C3;
@@ -355,3 +357,4 @@ static void _ccv_read_gray_raw(ccv_dense_matrix_t** x, const void* data, int typ
 		}
 	}
 }
+

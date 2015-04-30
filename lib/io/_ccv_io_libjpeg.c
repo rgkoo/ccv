@@ -1,5 +1,7 @@
 #include <setjmp.h>
-
+#include <ccv.h>
+#include <stdio.h>
+#include <jpeglib.h>
 typedef struct ccv_jpeg_error_mgr_t
 {
 	struct jpeg_error_mgr pub;
@@ -10,16 +12,9 @@ METHODDEF(void) error_exit(j_common_ptr cinfo)
 {
 	ccv_jpeg_error_mgr_t* err_mgr = (ccv_jpeg_error_mgr_t*)(cinfo->err);
 
-	/* Return control to the setjmp point */
 	longjmp(err_mgr->setjmp_buffer, 1);
 }
 
-/***************************************************************************
- * following code is for supporting MJPEG image files
- * based on a message of Laurent Pinchart on the video4linux mailing list
- ***************************************************************************/
-
-/* JPEG DHT Segment for YCrCb omitted from MJPEG data */
 static
 unsigned char _ccv_jpeg_odml_dht[0x1a4] = {
 	0xff, 0xc4, 0x01, 0xa2,
@@ -81,10 +76,6 @@ unsigned char _ccv_jpeg_odml_dht[0x1a4] = {
 	0xf9, 0xfa
 };
 
-/*
- * Parse the DHT table.
- * This code comes from jpeg6b (jdmarker.c).
- */
 static int _ccv_jpeg_load_dht(struct jpeg_decompress_struct *info, unsigned char *dht, JHUFF_TBL *ac_tables[], JHUFF_TBL *dc_tables[])
 {
 	unsigned int length = (dht[2] << 8) + dht[3] - 2;
@@ -141,10 +132,6 @@ static int _ccv_jpeg_load_dht(struct jpeg_decompress_struct *info, unsigned char
 	return 0;
 }
 
-/***************************************************************************
- * end of code for supportting MJPEG image files
- * based on a message of Laurent Pinchart on the video4linux mailing list
- ***************************************************************************/
 
 static void _ccv_read_jpeg_fd(FILE* in, ccv_dense_matrix_t** x, int type)
 {
@@ -169,7 +156,6 @@ static void _ccv_read_jpeg_fd(FILE* in, ccv_dense_matrix_t** x, int type)
 	if (im == 0)
 		*x = im = ccv_dense_matrix_new(cinfo.image_height, cinfo.image_width, (type) ? type : CCV_8U | ((cinfo.num_components > 1) ? CCV_C3 : CCV_C1), 0, 0);
 
-	/* yes, this is a mjpeg image format, so load the correct huffman table */
 	if (cinfo.ac_huff_tbl_ptrs[0] == 0 && cinfo.ac_huff_tbl_ptrs[1] == 0 && cinfo.dc_huff_tbl_ptrs[0] == 0 && cinfo.dc_huff_tbl_ptrs[1] == 0)
 		_ccv_jpeg_load_dht(&cinfo, _ccv_jpeg_odml_dht, cinfo.ac_huff_tbl_ptrs, cinfo.dc_huff_tbl_ptrs);
 
@@ -199,7 +185,6 @@ static void _ccv_read_jpeg_fd(FILE* in, ccv_dense_matrix_t** x, int type)
 	{
 		if ((cinfo.num_components > 1 && ch == CCV_C3) || (cinfo.num_components == 1 && ch == CCV_C1))
 		{
-			/* no format coversion, direct copy */
 			if (im->cols * ch < im->step)
 			{
 				size_t extra = im->step - im->cols * ch;
@@ -222,7 +207,6 @@ static void _ccv_read_jpeg_fd(FILE* in, ccv_dense_matrix_t** x, int type)
 		} else {
 			if (cinfo.num_components > 1 && CCV_GET_CHANNEL(im->type) == CCV_C1)
 			{
-				/* RGB to gray */
 				while (cinfo.output_scanline < cinfo.output_height)
 				{
 					jpeg_read_scanlines(&cinfo, buffer, 1);
@@ -233,7 +217,6 @@ static void _ccv_read_jpeg_fd(FILE* in, ccv_dense_matrix_t** x, int type)
 					ptr += im->step;
 				}
 			} else if (cinfo.num_components == 1 && CCV_GET_CHANNEL(im->type) == CCV_C3) {
-				/* gray to RGB */
 				while (cinfo.output_scanline < cinfo.output_height)
 				{
 					jpeg_read_scanlines(&cinfo, buffer, 1);
@@ -256,7 +239,6 @@ static void _ccv_read_jpeg_fd(FILE* in, ccv_dense_matrix_t** x, int type)
 	} else {
 		if (CCV_GET_CHANNEL(im->type) == CCV_C1)
 		{
-			/* CMYK to gray */
 			while (cinfo.output_scanline < cinfo.output_height)
 			{
 				jpeg_read_scanlines(&cinfo, buffer, 1);
@@ -273,7 +255,6 @@ static void _ccv_read_jpeg_fd(FILE* in, ccv_dense_matrix_t** x, int type)
 				ptr += im->step;
 			}
 		} else if (CCV_GET_CHANNEL(im->type) == CCV_C3) {
-			/* CMYK to RGB */
 			while (cinfo.output_scanline < cinfo.output_height)
 			{
 				jpeg_read_scanlines(&cinfo, buffer, 1);

@@ -1,3 +1,5 @@
+#include <ccv.h>
+#include <stdio.h>
 static void _ccv_read_bmp_fd(FILE* in, ccv_dense_matrix_t** x, int type)
 {
 	fseek(in, 10, SEEK_SET);
@@ -16,13 +18,11 @@ static void _ccv_read_bmp_fd(FILE* in, ccv_dense_matrix_t** x, int type)
 		fseek(in, 12, SEEK_CUR);
 		(void) fread(&clrused, 4, 1, in);
 		fseek(in, size - 36, SEEK_CUR);
-		/* only support 24-bit bmp */
 	} else if (size == 12) {
 		(void) fread(&width, 4, 1, in);
 		(void) fread(&height, 4, 1, in);
 		(void) fread(&bpp, 4, 1, in);
 		bpp = bpp >> 16;
-		/* TODO: not finished */
 	}
 	if (width == 0 || height == 0 || bpp == 0)
 		return;
@@ -83,3 +83,4 @@ static void _ccv_read_bmp_fd(FILE* in, ccv_dense_matrix_t** x, int type)
 		}
 	}
 }
+
